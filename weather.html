@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.12/css/jquery.dataTables.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script src="https://code.jquery.com/jquery-3.1.1.js" integrity="sha256-16cdPddA6VdVInumRGo6IbivbERE8p7CQR3HzTBuELA="
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-1.2.0.min.js"></script>
+    <script src="js/scriptWeather.js"></script>
+    <title>myWeatherResp</title>
+
+    <style>
+        /* Remove the navbar's default margin-bottom and rounded borders */
+        .col-sm-12{
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+        }
+        .navbar {
+            margin-bottom: 0;
+            border-radius: 0;
+        }
+
+        .col-sm-2 .sidenav {
+            height: 800px;
+        }
+
+
+        td.details-control {
+            background: url('https://datatables.net/examples/resources/details_open.png') no-repeat center center;
+            cursor: pointer;
+        }
+        tr.shown td.details-control {
+            background: url('https://datatables.net/examples/resources/details_close.png') no-repeat center center;
+        }
+
+        /* On small screens, set height to 'auto' for sidenav and grid */
+        /* Large desktop */
+        @media (min-width: 1200px) {
+            ...
+        }
+
+        /* Portrait tablet to landscape and desktop */
+        @media (min-width: 768px) and (max-width: 979px) {
+            ...
+        }
+
+        /* Landscape phone to portrait tablet */
+        @media (max-width: 767px) {
+            ...
+        }
+
+        /* Landscape phones and down */
+        @media (max-width: 480px) {
+            ...
+        }
+    </style>
+</head>
+
+<script>
+    $(document).ready(foundJson());
+
+    $(document).ready(function () {
+        $("#search .btn").click(function () {
+            $(this).button('loading').delay(500).queue(function () {
+                $(this).button('reset');
+                $(this).dequeue();
+            });
+        });
+    });
+
+
+    $(document).ready(function() {
+        var table = $('#example').DataTable( {
+            data: getDate(),
+            "columns": [
+                {
+                    "className":      'details-control',
+                    "orderable":      false,
+                    "data":           null,
+                    "defaultContent": ''
+                },
+                { "data": "Temperature" },
+                { "data": "Humidity" },
+                { "data": "Wind" },
+                { "data": "Description" }
+            ],
+            "order": [[1, 'asc']]
+        } );
+
+        // Add event listener for opening and closing details
+        $('#example tbody').on('click', 'td.details-control', function () {
+            var tr = $(this).closest('tr');
+            var row = table.row( tr );
+
+            if ( row.child.isShown() ) {
+                // This row is already open - close it
+                row.child.hide();
+                tr.removeClass('shown');
+            }
+            else {
+                // Open this row
+                row.child( format(row.data()) ).show();
+                tr.addClass('shown');
+            }
+        } );
+    } );
+</script>
+<body>
+<nav class="navbar navbar-inverse">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">myWeather</a>
+        </div>
+        <div class="collapse navbar-collapse" id="myNavbar">
+            <ul class="nav navbar-nav">
+                <li><a href="#">About Project</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="col-sm-12">
+
+    <div class="container-fluid" style="align-items: center;display: flex; justify-content: center;">
+
+        <div id="allDays" class="col-sm-12 "
+             style="min-height: 400px;max-width: 1140px;margin-top: 15px; min-width: 300px; max-height: 2280px; padding: 10px;background-color: aquamarine; position: relative;">
+
+            <div id="Day" class="col-sm-4 center-block"
+                 style="height: 280px; width: 160px;">
+
+                <div id="pictureDay" class="col-md-2"
+                     style=" margin-top: 15px; width: 100%; height: 70px;">
+                    <img id="imageid1" src="" style="width: 100%;height: 100%">
+                    <script>
+                        $(document).ready(changeImg(1));
+                    </script>
+                </div>
+                <div id="textDay" class="col-md-2"
+                     style="margin-top: 15px; width: 100%; height: 164px;">
+                    <p class="temp1 text-center" style=" margin: 0 2px;" id="desc1"></p>
+
+                    <p class="temp1 text-center" style=" margin: 0 2px;" id="temp1"></p>
+
+                    <p class="temp1 text-center" style=" margin: 0 2px;" id="rain1"></p>
+
+                    <p class="temp1 text-center" style=" margin: 0 2px;" id="humi1"></p>
+
+                    <p class="temp1 text-center" style=" margin: 0 2px;" id="wind1"></p>
+
+                    <p class="temp1 text-center" style=" margin: 0 2px;" id="date1"></p>
+
+                    <script>
+                        $(document).ready(getBoxInfo1(1));
+                    </script>
+
+                </div>
+            </div>
+            <div id="oneDay" class="col-md-2 center-block"
+                 style="height: 280px; width: 160px;">
+                <div id="pictureOneDay" class="col-md-2"
+                     style=" margin-top: 15px; width: 100%; height: 70px;">
+                    <img id="imageid2" src="" style="width: 100%;height: 100%">
+                    <script>
+                        $(document).ready(changeImg(2));
+                    </script>
+                </div>
+                <div id="textOneDay" class="col-md-2"
+                     style=" margin-top: 15px; width: 100%; height: 164px;">
+                    <p class="temp1 text-center" style=" margin: 0 2px;" id="desc2"></p>
+
+                    <p class="temp1 text-center" style=" margin: 0 2px;" id="temp2"></p>
+
+                    <p class="temp1 text-center" style=" margin: 0 2px;" id="rain2"></p>
+
+                    <p class="temp1 text-center" style=" margin: 0 2px;" id="humi2"></p>
+
+                    <p class="temp1 text-center" style=" margin: 0 2px;" id="wind2"></p>
+
+                    <p class="temp1 text-center" style=" margin: 0 2px;" id="date2"></p>
+
+                    <script>
+                        $(document).ready(getBoxInfo1(2));
+                    </script>
+
+                </div>
+            </div>
+            <div id="twoDay" class="col-sm-4 center-block"
+                 style="height: 280px; width: 160px;">
+                <div id="pictureTwoDay" class="col-md-2"
+                     style=" margin-top: 15px; width: 100%; height: 70px;">
+                    <img id="imageid3" src="" style="width: 100%;height: 100%">
+                    <script>
+                        $(document).ready(changeImg(3));
+                    </script>
+                </div>
+                <div id="textTwoDay" class="col-sm-4"
+                     style=" margin-top: 15px; width: 100%; height: 164px;">
+                    <p class="temp1 text-center" style=" margin: 0 2px;" id="desc3"></p>
+
+                    <p class="temp1 text-center" style=" margin: 0 2px;" id="temp3"></p>
+
+                    <p class="temp1 text-center" style=" margin: 0 2px;" id="rain3"></p>
+
+                    <p class="temp1 text-center" style=" margin: 0 2px;" id="humi3"></p>
+
+                    <p class="temp1 text-center" style=" margin: 0 2px;" id="wind3"></p>
+
+                    <p class="temp1 text-center" style=" margin: 0 2px;" id="date3"></p>
+
+                    <script>
+                        $(document).ready(getBoxInfo1(3));
+                    </script>
+                </div>
+            </div>
+            <div id="treeDay" class="col-sm-4 center-block"
+                 style="height: 280px; width: 160px;">
+                <div id="picturTreeDay" class="col-md-2"
+                     style=" margin-top: 15px; width: 100%; height: 70px;">
+                    <img id="imageid4" src="" style="width: 100%;height: 100%">
+                    <script>
+                        $(document).ready(changeImg(4));
+                    </script>
+                </div>
+                <div id="textTreeDay" class="col-md-2 center-block"
+                     style=" margin-top: 15px; width: 100%; height: 164px;">
+                    <p class="temp1 text-center" style=" margin: 0 2px;" id="desc4"></p>
+
+                    <p class="temp1 text-center" style=" margin: 0 2px;" id="temp4"></p>
+
+                    <p class="temp1 text-center" style=" margin: 0 2px;" id="rain4"></p>
+
+                    <p class="temp1 text-center" style=" margin: 0 2px;" id="humi4"></p>
+
+                    <p class="temp1 text-center" style=" margin: 0 2px;" id="wind4"></p>
+
+                    <p class="temp1 text-center" style=" margin: 0 2px;" id="date4"></p>
+
+                    <script>
+                        $(document).ready(getBoxInfo1(4));
+                    </script>
+                </div>
+            </div>
+            <div id="fourDay" class="col-sm-4 center-block"
+                 style="height: 280px; width: 160px;">
+                <div id="pictureFourDay" class="col-md-2"
+                     style=" margin-top: 15px; width: 100%; height: 70px;">
+                    <img id="imageid5" src="" style="width: 100%;height: 100%">
+                    <script>
+                        $(document).ready(changeImg(5));
+                    </script>
+                </div>
+                <div id="textFourDay" class="col-md-2"
+                     style=" margin-top: 15px; width: 100%; height: 164px;">
+                    <p class="temp1 text-center" style=" margin: 0 2px;" id="desc5"></p>
+
+                    <p class="temp1 text-center" style=" margin: 0 2px;" id="temp5"></p>
+
+                    <p class="temp1 text-center" style=" margin: 0 2px;" id="rain5"></p>
+
+                    <p class="temp1 text-center" style=" margin: 0 2px;" id="humi5"></p>
+
+                    <p class="temp1 text-center" style=" margin: 0 2px;" id="wind5"></p>
+
+                    <p class="temp1 text-center" style=" margin: 0 2px;" id="date5"></p>
+
+                    <script>
+                        $(document).ready(getBoxInfo1(5));
+                    </script>
+                </div>
+            </div>
+            <div id="sixDay" class="col-sm-4 center-block center-block"
+                 style="height: 280px; width: 160px; ">
+                <div id="pictureSixDay" class="col-md-2"
+                     style=" margin-top: 15px; width: 100%; height: 70px;">
+                    <img id="imageid6" src="" style="width: 100%;height: 100%">
+                    <script>
+                        $(document).ready(changeImg(6));
+                    </script>
+                </div>
+                <div id="textSixDay" class="col-md-2"
+                     style=" margin-top: 15px;width: 100%; height: 164px;">
+                    <p class="temp1 text-center" style=" margin: 0 2px;" id="desc6"></p>
+
+                    <p class="temp1 text-center" style=" margin: 0 2px;" id="temp6"></p>
+
+                    <p class="temp1 text-center" style=" margin: 0 2px;" id="rain6"></p>
+
+                    <p class="temp1 text-center" style=" margin: 0 2px;" id="humi6"></p>
+
+                    <p class="temp1 text-center" style=" margin: 0 2px;" id="wind6"></p>
+
+                    <p class="temp1 text-center" style=" margin: 0 2px;" id="date6"></p>
+
+                    <script>
+                        $(document).ready(getBoxInfo1(6));
+                    </script>
+
+                </div>
+            </div>
+            <div id="sevenDay" class="col-sm-4 center-block"
+                 style="height: 280px; width: 160px;">
+                <div id="pictureSevenDay" class="col-md-2"
+                     style=" margin-top: 15px; width: 100%; height: 70px;">
+                    <img id="imageid7" src="" style="width: 100%;height: 100%">
+                    <script>
+                        $(document).ready(changeImg(7));
+                    </script>
+                </div>
+                <div id="textSevenDay" class="col-md-2"
+                     style=" margin-top: 15px; width: 100%; height: 164px;">
+                    <p class="temp1 text-center" style=" margin: 0 2px;" id="desc7"></p>
+
+                    <p class="temp1 text-center" style=" margin: 0 2px;" id="temp7"></p>
+
+                    <p class="temp1 text-center" style=" margin: 0 2px;" id="rain7"></p>
+
+                    <p class="temp1 text-center" style=" margin: 0 2px;" id="humi7"></p>
+
+                    <p class="temp1 text-center" style=" margin: 0 2px;" id="wind7"></p>
+
+                    <p class="temp1 text-center" style=" margin: 0 2px;" id="date7"></p>
+
+                    <script>
+                        $(document).ready(getBoxInfo1(7));
+                    </script>
+                </div>
+            </div>
+
+            <h1 class="h1 text-center" id="nameOfCity"
+                style="font-family: 'Chalkboard'; margin-top: 0px; font-size: 65px"></h1>
+
+            <script>
+                $(document).ready(getName());
+            </script>
+
+            <input type="text" class="form-control center-block text-center"
+                   onKeyDown="if(event.keyCode==13) searchYourCity();" id="myText"
+                   placeholder="Name of your City"
+                   style="max-width: 250px; min-width: 150px">
+            <script>
+                document.getElementById('myText').onkeydown = function (event) {
+                    if (event.keyCode == 13) {
+                        searchYourCity();
+                    }
+                }
+            </script>
+            <button type="button" class="btn btn-primary center-block" onclick="searchYourCity()">Loading City
+            </button>
+
+        </div>
+
+    </div>
+    <!--<div class="container-fluid " style="align-items: center;display: flex; display: flex;">
+        <div id="search" class="center "
+             style="min-height: 200px;max-width: 1140px; min-width: 300px; max-height: 2280px; padding: 10px;background-color: aquamarine; position: relative; /*border: 1px solid black">
+
+        </div>
+
+    </div>-->
+    <div class="container-fluid" style="align-items: center;display: flex; justify-content: center;">
+
+        <div id="tableGrapg" class="col-sm-12"
+             style="height: 300px;margin-top: 15px;max-width: 1140px; padding: 10px;min-width: 300px; position: relative; ">
+            <div id="columnchart_material" class="divBOTH">
+
+            </div>
+        </div>
+
+    </div>
+
+    <div class="container-fluid" style="align-items: center;display: flex; justify-content: center;">
+
+        <div id="tableLine" class="col-sm-12"
+             style="height: 350px;margin-top: 15px; padding: 10px; max-width: 1140px;min-width: 300px; position: relative; ">
+            <div id="myDiv" class="divBOTH"
+                 style="height: 300px;margin-top: 15px; padding: 10px;min-width: 180px; position: relative;">
+                <!-- Plotly chart will be drawn inside this DIV -->
+                <script>
+                    $(document).ready(createLine());
+                </script>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="container-fluid" style="align-items: center;display: flex; justify-content: center;">
+
+        <div id="tableChild" class="col-sm-12"
+             style="min-height: 550px; max-height: 2000px;margin-top: 15px; padding: 10px; max-width: 1140px;min-width: 300px; position: relative; ">
+
+            <table id="example" class="display" cellspacing="0" width="100%">
+                <thead>
+                <tr>
+                    <th></th>
+                    <th>Temperature</th>
+                    <th>Humidity</th>
+                    <th>wind</th>
+                    <th>Description</th>
+                </tr>
+                </thead>
+                <tfoot>
+                <tr>
+                    <th></th>
+                    <th>Temperature</th>
+                    <th>Humidity</th>
+                    <th>wind</th>
+                    <th>Description</th>
+                </tr>
+                </tfoot>
+            </table>
+
+        </div>
+    </div>
+
+</div>
+</div>
+
+
+</body>
+</html>
